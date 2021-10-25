@@ -63,7 +63,7 @@ class MessageView extends StatelessWidget {
                         row('Channel ID', notification.android!.channelId),
                         row('Click Action', notification.android!.clickAction),
                         row('Color', notification.android!.color),
-                        row('Count', notification.android!.count!.toString()),
+                        row('Count', notification.android!.count.toString()),
                         row('Image URL', notification.android!.imageUrl),
                         row('Link', notification.android!.link),
                         row('Priority', notification.android!.priority.toString()),

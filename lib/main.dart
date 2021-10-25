@@ -4,7 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:googleapis_auth/auth.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:message/permissions.dart';
 import 'package:message/token_monitor.dart';
@@ -80,16 +83,19 @@ int _messageCount = 0;
 String constructFCMPayload(String? token) {
   _messageCount++;
   return jsonEncode({
-    'token': token,
-    'data': {
-      'via' : 'FlutterFire Cloud Messaging!!!',
-      'count' : _messageCount.toString(),
-    },
-    'notification' : {
-      'title': 'Hello FlutterFire!',
-      'body': 'This notification (#$_messageCount) was created via FCM!',
+    'message': {
+      'token': token,
+      'data': {
+        'via': 'FlutterFire Cloud Messaging!!!',
+        'count': _messageCount.toString(),
+      },
+      'notification': {
+        'title': 'Hello FlutterFire!',
+        'body': 'This notification (#$_messageCount) was created via FCM!',
+      }
     }
-  });
+  }
+  );
 }
 
 class Application extends StatefulWidget {
@@ -152,10 +158,17 @@ class _ApplicationState extends State<Application> {
       return;
     }
     try {
-     final response =  await http.post(
-        Uri.parse('https://fcm.googleapis.com/v1/projects/cloudmessagedemo-11e05/messages:send'),
+      final String jsonKeys = await rootBundle.loadString(
+          'assets/server/cloudmessagedemo-11e05-firebase-adminsdk-m42rw-1952fc40dd.json'
+      );
+      var accountCredentials = ServiceAccountCredentials.fromJson(jsonKeys);
+      var scopes = ["https://www.googleapis.com/auth/firebase.messaging"];
+      var client = http.Client();
+      //
+      AccessCredentials credentials = await obtainAccessCredentialsViaServiceAccount(accountCredentials, scopes, client);
+      final response = await client.post(Uri.parse('https://fcm.googleapis.com/v1/projects/cloudmessagedemo-11e05/messages:send'),
         headers: <String, String> {
-          "Authorization": 'Bearer $_token',
+          'Authorization': 'Bearer ${credentials.accessToken.data}',
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body:constructFCMPayload(_token),
