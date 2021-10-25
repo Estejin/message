@@ -1,6 +1,12 @@
 # message
 
-A new Flutter project.
+This is a project used to confirm the implement of Firebase in Flutter(Android/iOS).
+
+I referenced the offical sample project, and updated some codes to support latest SDK.
+
+The codes has passed test on Android and iOS device.
+
+You must config your Firebase by yourself.
 
 ## Getting Started
 
